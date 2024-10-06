@@ -9,3 +9,5 @@ class Raza(Enum):
     MAGO = 3
     ENANO = 4
     HOBBIT = 5
+    ENT = 6
+    HUARGO = 7

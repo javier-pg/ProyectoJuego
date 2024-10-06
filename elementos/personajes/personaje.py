@@ -1,5 +1,5 @@
 import random
-from elementos.raza import Raza
+from elementos.personajes.raza import Raza
 from elementos.extra.mision import Mision
 from elementos.extra.mascota import Mascota
 from elementos.extra.arma import Arma, TipoArma
@@ -207,6 +207,7 @@ class Personaje:
         """
         print(f"Realizando misión: {str(mision)}")
 
+
     def añade_amigo(self, amigo: 'Personaje') -> bool:
         """
         Añaade un amigo al personaje (RELACIÓN DE ASOCIACIÓN)
@@ -269,3 +270,167 @@ class Personaje:
         """
         if self._mascota and not self._mascota.tiene_energia():   # no necesito saber su energia, sólo si tiene  (delego esa comprobación)
             self._mascota.alimentar()                             # no necesito saber cómo lo hace, sólo que lo hace (delego esa funcionalidad)
+
+
+
+
+### Practicamos diferentes situaciones de herecia y polimorfismo ###
+
+## SOBRECARGA DE MÉTODOS ##
+
+# Clase humano heredando absolutamente todo de la clase Personaje (no sobreescribe métodos ni atributos)
+class Humano(Personaje):
+    """
+    Representa a un personaje de tipo humano.
+    """
+    pass
+
+
+# Clase hobbit, heredando de personaje pero particularmente, los hobbits no atacan
+class Hobbit(Personaje):
+    """
+    Representa a un personaje de tipo hobbit.
+    """
+
+    # Sobreescribimos el método ataca() para un comportamiento particular. Ahora en esta subclase se ejecuta este método sin parámetros.
+    # Los atributos y demás métodos se siguen heredando igual
+    def ataca(self):
+        """
+        Aunque se lo indiques, los hobbits son seres tranquilos que no atacan
+        """
+        print("Los hobbits no atacan")
+
+
+# Clase mago heredando de Personaje, sobreescribiendo el método ataca
+class Mago(Personaje):
+    """
+    Representa a un personaje de tipo mago.
+    """
+
+    # Sobeescribimos el método ataca para refinarlo. Este método se ejecutará para el tipo Mago.
+    # Los atributos y demás métodos se siguen heredando igual
+    def ataca(self, hechizo: str):
+        """
+        Ataca al enemigo con hechizo.
+
+        Parámetros:
+        hechizo: str -- hechizo a utilizar
+        """
+        super().ataca(hechizo=hechizo)  # llamamos al método de la clase padre (reutilización)
+        print("Recuerda, el valor no es saber cuando quitar una vida, sino cuando perdonarla.")  # extensión, añadimos funcionalidad extra al método
+
+
+## HERENCIA DE ATRIBUTOS Y OCULTACIÓN ##
+
+# Clase ent heredando de personaje, ocultando todos los atributos pues no los necesita
+class Ent(Personaje):
+    """
+    Representa a un personaje de tipo ent (árbol viviente)
+    """
+    
+    # No heredamos los atributos de la clase padre, no los necesitamos.
+    # El personaje de tipo Ent sólo necesita un nombre. 
+    # Por ejemplo, no tiene dinero, ni es aliado ni pertenece a un equipo.
+    # Tampoco tendrá listado de amigos ni inventario de objetos, ni arma.
+    def __init__(self, nombre: str):
+        """
+        Constructor de la clase Ent
+
+        Parámetros:
+        nombre: str -- nombre del ent
+        """
+        self._nombre = nombre
+        self._tipo = Raza.ENT    # Ocultación de atributos, no se heredan de la clase padre
+
+    # IMPORTANTE: El resto de métodos y funcionalidades de la clase padre se heredan igualmente
+    # Las funcionalidades relacionadas con los atributos que hemos ocultado pueden fallar (no existen). 
+    # Por ejemplo, no se puede dar monedas, ni quitar monedas, ni comprobar si tiene dinero.
+    # Habría que sobreescribirlos en esta clase y devolver que no es posible:
+
+    # Por ejemplo, sobreescritura: 
+    def añade_moneda(self) -> bool:
+        """
+        Intenta añadir una moneda al Ent (no se puede hacer)
+        """
+        print("Los Ents no saben lo que es el dinero")
+        return False
+    
+    # ¿Debería ser realmente la clase Ent una subclase Personaje si no se va a beneficiar de todo lo que tiene un personaje?
+    # ¿Es un Ent realmente una particularización de un personaje?
+
+
+# Clase enano heredando de Personaje, ocultando el atributo dinero
+class Enano(Personaje):
+    """
+    Representa a un personaje de tipo enano
+    """
+    
+    # Los enanos pueden tener un nombre, un equipo y una macota.
+    def __init__(self, equipo: str = None, nombre=None, mascota: Mascota = None):
+        """
+        Constructor de la clase Enano
+
+        Parámetros:
+        equipo: str -- equipo al que pertenece el enano
+        nombre: str -- nombre del enano
+        mascota: Mascota -- mascota del enano
+        """
+        # Llamamos al constructor de la clase padre, pasándole los parámetros necesarios
+        # Observa como aquí pasamos la raza y que son siempre aliados.
+        super().__init__(raza=Raza.ENANO, aliado=True, equipo=equipo, nombre=nombre, mascota=mascota)
+        # Recuerda que tendremos dinero, un inventario de objetos, amigos, mascota, arma, etc.
+        self._dinero = 1000 # como buenos comerciantes, los enanos podría iniciarse con 1000 monedas (ocultación del atributo del padre con el mismo nombre)
+
+
+# Clase orco heredando de Personaje, ocultando el atributo dinero
+class Orco(Personaje):
+    """
+    Representa a un personaje de tipo orco
+    """
+    
+    # Los orcos siempre tienen un jefe, y pueden tener un nombre si tienen suerte.
+    def __init__(self, jefe: Personaje, nombre: str =None):
+        """
+        Constructor de la clase Orco
+        
+        Parámetros:
+        jefe: Orco -- jefe del orco
+        nombre: str -- nombre del orco
+        """
+
+        # Llamamos al constructor de la clase padre, pasándole los parámetros necesarios
+        # Observa como aquí pasamos la raza y que son siempre enemigos.
+        super().__init__(raza=Raza.ORCO, aliado=False, nombre=nombre, equipo="Ejército de Mordor") # no hay ocultación
+        
+        # Un orco sólo puede tener un jefe de tipo Orco
+        if isinstance(jefe, Orco) or type(jefe) == Orco:  # ambos son equivalentes en este caso
+            self._jefe : Orco = jefe    # atributo propio de la clase Orco
+        else:
+            print("El jefe de un orco debe ser otro orco")
+            self._jefe : Orco = None    # si no es un orco, no tiene jefe
+        
+        self._amigos.append(jefe)   # añadimos al jefe como amigo (el listado de amigos vacío se hereda de la clase padre)
+        
+        self.set_mascota(Mascota(nombre="Lobo", raza=Raza.HUARGO, nivel=5))  # todos los orcos tiene asociado un Huargo
+        # RECUERDA. Tenemos acceso a todos los métodos heredados (públicos y privados) de la clase Personaje, como set_mascota()
+
+    # refinamiento del método mágico str, pues hemos añadidos atributos propios
+    def __str__(self) -> str:
+        """
+        Método mágico para representar el objeto como string
+        """
+        if self._jefe:
+            return f"Orco {self._nombre} de raza {self.raza.name} ({self._equipo}) con jefe {self._jefe.get_nombre()}"
+        else:
+            return f"Orco {self._nombre} de raza {self.raza.name} ({self._equipo}) sin jefe"
+        
+    
+    # un orco dispara 3 balas a la vez, en lugar de una como el resto
+    def dispara(self) -> bool:
+        """
+        Dispara el arma del orco, si tiene una. Dispara tres balas a la vez.
+        """
+        # while no se hayan disparado las tres balas y se siga disparando, disparo
+        i=0
+        while i<3 and super().dispara():
+            i+=1
