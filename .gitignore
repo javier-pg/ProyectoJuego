@@ -1,2 +1,6 @@
 /.venv
 /graficos
+
+# ficheros y directorios cache de python
+__pycache__/
+*.pyc
