@@ -47,13 +47,13 @@ También puedes seguir estos pasos:
 1. Asegúrate de estar en el directorio del proyecto.
 2. Ejecuta el siguiente comando:
     ```bash
-    python main.py
+    python juego.py
     ```
 
 ## Estructura del proyecto
 
 - `README.md`: Este archivo con las instrucciones del proyecto.
-- `app/main.py`: Módulo principal para ejecutar el proyecto.
+- `juego.py`: Módulo principal para ejecutar el proyecto.
 - `elementos/`: Paquete con el código fuente de los elementos del proyecto.
 
 
