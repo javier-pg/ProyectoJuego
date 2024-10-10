@@ -2,7 +2,7 @@ import random
 from elementos.personajes.raza import Raza
 from elementos.extra.mision import Mision
 from elementos.extra.mascota import Mascota
-from elementos.extra.arma import Arma, TipoArma
+from elementos.extra.arma import Arma, TipoArma, ArmaCorta, ArmaLarga, ArmaFuego
 from elementos.extra.objeto import Objeto
 
 class Personaje:
@@ -57,6 +57,8 @@ class Personaje:
         Personaje.num_personajes += 1
 
         self.__guarda_datos()                                   # llamada a un método privado (no se puede acceder desde fuera de la clase)
+
+        self._vida = 100                                        # vida del personaje, no se puede acceder desde fuera de la clase
 
 
     # Método mágico para representar el objeto como string
@@ -120,6 +122,15 @@ class Personaje:
         int -- dinero del personaje
         """
         return self._dinero
+    
+    def get_arma(self) -> Arma:
+        """
+        Devuelve el arma del personaje
+
+        Returns:
+        Arma -- arma del personaje
+        """
+        return self._arma
 
     def _set_dinero(self, dinero: int):     # sólo se puede modificar el dinero desde dentro de la clase/subclases
         """
@@ -223,6 +234,7 @@ class Personaje:
             amigo.añadir_amigo(self)    # bidireccionalidad
             return True
         return False
+    
 
     def recoge_objeto(self, objeto: Objeto):
         """
@@ -233,33 +245,36 @@ class Personaje:
         """
         print(f"Recogiendo objeto: {str(objeto)}")
         self._inventario.append(objeto)
+
     
-    def fabrica_arma(self, nombre: str, tipo: TipoArma):
+    def fabrica_arma(self, nombre: str, tipo: TipoArma) -> bool:
         """
         Crea un arma para el personaje (RELACIÓN DE COMPOSICIÓN). Sólo se puede tener un arma y se desecha cuando se destruye el personaje.
-        Se indica el nombre y tipo de arma a crear. El daño se genera aleatoriamente entre 0 y 100.
+        Se indica el nombre y tipo de arma a crear.
 
         Parámetros:
         nombre: str -- nombre del arma
         tipo: TipoArma -- tipo del arma
-        """
-        print(f"Fabricando arma: {nombre}")
-        self._arma = Arma(nombre=nombre, daño=random.randint(0,100), tipo=tipo, dueño=self) # composición, el arma se destruirá con el personaje
-
-    
-    def dispara(self) -> bool:
-        """
-        Dispara el arma del personaje, si tiene una
 
         Returns:
-        bool -- True si ha disparado, False en caso contrario
+        bool -- True si se ha podido crear el arma, False en caso contrario
         """
-        if self._arma:
-            return self._arma.dispara()   # delego en el arma, no necesito saber cómo lo hace o el número de balas
+
+        print(f"Fabricando arma: {nombre}")
+        
+        if tipo == TipoArma.CORTA_DISTANCIA:
+            self._arma = ArmaCorta(nombre=nombre, dueño=self, estocadas=3)
+        elif tipo == TipoArma.LARGA_DISTANCIA:
+            self._arma = ArmaLarga(nombre=nombre, dueño=self)
+        elif tipo == TipoArma.FUEGO:
+            self._arma = ArmaFuego(nombre=nombre, dueño=self, balas = random.randint(1, 10))
         else:
-            print("No tengo arma")
+            print("Tipo de arma no válido")
             return False
-                        
+        
+        print(f"Arma creada: {self._arma}")
+        return True
+  
     
     def alimenta_mascota(self):
         """
@@ -270,8 +285,46 @@ class Personaje:
         """
         if self._mascota and not self._mascota.tiene_energia():   # no necesito saber su energia, sólo si tiene  (delego esa comprobación)
             self._mascota.alimentar()                             # no necesito saber cómo lo hace, sólo que lo hace (delego esa funcionalidad)
+     
+    # Cambiamos el método dispara() por usa arma
+    def usa_arma(self, objetivo: 'Personaje') -> bool:
+        """
+        Usa el arma del personaje.
 
+        Returns:
+        bool -- True si ha podido usarla, False en caso contrario
+        """
+        if self._arma:
+            return self.get_arma().usar(objetivo=objetivo)  # delegación
+        else:
+            print("No tengo arma!")
+            return False
+        
+    def mejora_arma(self):
+        """
+        Mejora el arma del personaje
+        """
+        if self._arma:
+            self.get_arma().mejorar()  # delegación
 
+    def recibe_daño(self, daño: int):
+        """
+        Recibe daño en la vida
+
+        Parámetros:
+        daño: int -- daño a recibir
+        """
+        if self._vida == 0:
+            print(f"{self._nombre} ya está muerto")
+
+        else: 
+            self._vida -= daño
+            if self._vida <= 0:
+                self._vida = 0
+                print(f"{self._nombre} ha recibido {daño} puntos de daño y ha muerto")
+            else:
+                print(f"{self._nombre} ha recibido {daño} puntos de daño. Vida restante: {self._vida}")
+                
 
 
 ### Practicamos diferentes situaciones de herecia y polimorfismo ###
@@ -387,6 +440,8 @@ class Orco(Personaje):
     """
     Representa a un personaje de tipo orco
     """
+
+    lances_por_ataque = 2
     
     # Los orcos siempre tienen un jefe, y pueden tener un nombre si tienen suerte.
     def __init__(self, jefe: Personaje, nombre: str =None):
@@ -425,12 +480,13 @@ class Orco(Personaje):
             return f"Orco {self._nombre} de raza {self.raza.name} ({self._equipo}) sin jefe"
         
     
-    # un orco dispara 3 balas a la vez, en lugar de una como el resto
-    def dispara(self) -> bool:
+    # un orco usa el arma 2 veces, en lugar de una como el resto
+    def usa_arma(self, objetivo: 'Personaje') -> bool:
         """
-        Dispara el arma del orco, si tiene una. Dispara tres balas a la vez.
+        Usa el arma del orco. En este caso, el orco la usa varias veces seguidas
         """
-        # while no se hayan disparado las tres balas y se siga disparando, disparo
+
+        print(f"{self._nombre} ataca {Orco.lances_por_ataque} veces a {objetivo.get_nombre()} con su arma")
         i=0
-        while i<3 and super().dispara():
+        while i<Orco.lances_por_ataque and super().usa_arma(objetivo):
             i+=1

@@ -2,7 +2,7 @@ from elementos.personajes.personaje import Personaje, Humano, Hobbit, Mago, Ent,
 from elementos.personajes.raza import Raza
 from elementos.extra.mascota import Mascota
 from elementos.extra.mision import Mision
-from elementos.extra.arma import TipoArma
+from elementos.extra.arma import TipoArma, Arma
 
 
 if __name__ == '__main__':
@@ -58,17 +58,19 @@ if __name__ == '__main__':
     print(orco)
 
     # Batalla
+
+    # armaAbstracta: Arma = Arma(nombre="Espada", tipo=TipoArma.CORTA_DISTANCIA, dueño=orco) ERORR. No se puede instanciar un objeto de una clase abstracta.
+
     gandalf.fabrica_arma(nombre="Bastón", tipo=TipoArma.LARGA_DISTANCIA)
-    gandalf.dispara()   # Si no es de tipo fuego, no se puede disparar
+    gandalf.usa_arma(objetivo=orco)  # Gandalf ataca a un orco con su bastón
 
     orco.fabrica_arma(nombre="Espada", tipo=TipoArma.CORTA_DISTANCIA)
-    orco.dispara()      # Si no es de tipo fuego, no se puede disparar
-
-    orco.fabrica_arma(nombre="Metralleta", tipo=TipoArma.FUEGO)
-    orco.dispara()      # Disparará tres balas
+    orco.usa_arma(objetivo=gandalf)  # El orco ataca a Gandalf con su espada
+    orco.mejora_arma()               
+    orco.usa_arma(objetivo=frodo)      
 
     frodo.fabrica_arma(nombre="Magnum", tipo=TipoArma.FUEGO)
-    frodo.dispara()     # Disparará una bala 
+    frodo.usa_arma(objetivo=orco)
 
     # Mostramos el número de personajes creados
     print(f"Personajes creados: {Personaje.get_num_personajes()}")
