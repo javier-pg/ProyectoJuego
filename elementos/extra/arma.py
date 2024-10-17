@@ -22,7 +22,6 @@ class Arma(ABC):
         nombre: str -- nombre del arma
         tipo: TipoArma -- tipo del arma
         dueño: Personaje -- personaje dueño del arma
-        nivel: int -- nivel del arma
         """
         self._nombre = nombre
         self._tipo = tipo
@@ -121,7 +120,6 @@ class ArmaLarga(Arma):
         objetivo.recibe_daño(self._daño)
         return True
 
-
     def mejorar(self):
         """
         Mejora el arma
@@ -164,7 +162,6 @@ class ArmaCorta(Arma):
         for _ in range(self._estocadas):
             objetivo.recibe_daño(self._daño)
         return True
-        
 
     def mejorar(self):
         """
@@ -174,8 +171,6 @@ class ArmaCorta(Arma):
         self._estocadas += 1
         self._nivel += 1
         print(f"{self._nombre} ha sido mejorada a nivel {self._nivel}")
-
-
     
     def __str__(self):  # SOBREESCRITURA DE MÉTODO (extensión)
         """
@@ -203,7 +198,6 @@ class ArmaFuego(Arma):
         super().__init__(nombre, TipoArma.FUEGO, dueño)
         self._daño = 40   # ocultación
         self._balas = balas  # nuevo atributo
-        
 
     def usar(self, objetivo: 'Personaje') -> bool:
         """
@@ -231,8 +225,6 @@ class ArmaFuego(Arma):
         self._nivel += 1
         print(f"{self._nombre} ha sido mejorada a nivel {self._nivel}")
 
-
-    
     def recargar(self, balas: int):
         """
         Recarga el arma con balas

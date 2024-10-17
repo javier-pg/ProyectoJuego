@@ -1,4 +1,5 @@
-class Mascota:
+from graficos.dibujable import IDibujable
+class Mascota(IDibujable):
     """
     Representa a una mascota del juego
     """
@@ -18,6 +19,9 @@ class Mascota:
         self._nivel = nivel
         self._dueño = dueño
         self._energia = 100
+
+        self._x = 0 # Posición x en el mapa
+        self._y = 0 # Posición y en el mapa
     
     def __str__(self):
         """
@@ -61,3 +65,45 @@ class Mascota:
         bool -- True si tiene energía, False en caso contrario
         """
         return self._energia > 0
+    
+    #### Métodos de la interfaz Dibujable ####
+    def dibujar(self):
+        """
+        Dibuja la mascota en el mapa
+        """
+        print(f"Dibujando a {self._nombre} en la posición ({self._x}, {self._y})")
+
+    def obtener_posicion(self) -> tuple[int, int]:
+        """
+        Devuelve la posición de la mascota en el mapa
+
+        Returns:
+        tuple[int, int] -- posición de la mascota en el mapa
+        """
+        return self._x, self._y
+    
+    def mover(self, nueva_posicion: tuple[int, int]):
+        """
+        Mueve la mascota a una nueva posición en el mapa
+
+        Parámetros:
+        nueva_posicion: tuple[int, int] -- nueva posición de la mascota
+        """
+        self._x, self._y = nueva_posicion
+        print(f"{self._nombre} se ha movido a la posición {nueva_posicion}")
+
+
+    def interactuar(self, otro: 'Dibujable'):
+        """
+        Interactúa con otro objeto en el mapa
+
+        Parámetros:
+        otro: Dibujable -- objeto con el que interactuar
+        """
+        from elementos.personajes.personaje import Personaje
+        # lo único que puede hacer una mascota al encontrarse con otro elemento es convertirse en mascota
+        if isinstance(otro, Personaje):
+            print(f"La mascota {self._nombre} se ha encontrado con {otro} y ahora es su mascota")
+            otro.set_mascota(self)
+        else:
+            print(f"La mascota {self._nombre} se ha encontrado con {otro} y no ha pasado nada")
