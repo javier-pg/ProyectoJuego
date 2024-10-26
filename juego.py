@@ -1,3 +1,4 @@
+from elementos.errores.errores import ArmaError
 from elementos.personajes.personaje import Personaje, Humano, Hobbit, Mago, Ent, Enano, Orco
 from elementos.personajes.raza import Raza
 from elementos.extra.mascota import Mascota
@@ -130,6 +131,105 @@ if __name__ == '__main__':
     # Dibujamos el mapa actualizado
     mapa.dibujar_mapa()
 
-    
-    
 
+    ######### CLASE 8: Excepciones #######
+    print("@@@@@@ CLASE 8: EXCEPCIONES @@@@@@@")
+
+    ### CAPTURAR EXCEPCIONES
+
+    # Excepciones básicas (no suelen gestionarse si somos buenos programadores)
+    try:
+        print(sauron) # NameError
+        print("Esto no se ejecuta si hay error antes")
+    except:
+        print("Capturo cualquier error posible. Sigo ejecutando por aquí")
+        # Si capturo, el programa no falla
+
+    # Se sigue ejecutando, pues hemos capturado error
+
+    try:
+        print(gandalf.get_arma()/2)  # TypeError
+    except TypeError:
+        print("Capturo error sobre el tipo. Los demás no")
+
+    # Se sigue ejecutando, pues hemos capturado error
+
+    try:
+        print(gandalf.get_arma().get_daño() / 0)  # ZeroDivisionError
+    except ZeroDivisionError as error_division:
+        print(f"Error! {error_division}")   #
+        print(type(error_division))
+
+    # Se sigue ejecutando, pues hemos capturado error
+    try:
+        sauron: Personaje = None
+        print(sauron.raza)          # AttributeError
+    except TypeError as error_tipo:
+        print("Capturo error de tipo")
+    except ZeroDivisionError as error_division:
+        print("Capturo error de división por cero")
+    except (RuntimeError, Exception) as error:      # cualquier error
+        print(f"Error! {error}")
+        print(type(error))
+
+    # Se sigue ejecutando, pues hemos capturado error
+    try:
+        print(personajes[200])      # IndexError
+    except IndexError as error:
+        print(f"Error! {error}")
+    else:   # si no hay error
+        print("Existen al menos 201 personajes!")
+
+    try:
+        print(personajes[2])      # No hay error
+    except IndexError as error:
+        print(f"Error! {error}")
+    else:   # si no hay error
+        print("Existen al menos 3 personajes")
+
+
+    try:
+        print(personajes[400])      # Hay error
+        print("Esto no se ejecutará nunca")
+    except IndexError as error:    # si hay error (en este caso)
+        print(f"Error! {error}")
+    else:   # si no hay error (esto no se daría)
+        print("Existen al menos 401 personajes")
+    finally: # siempre
+        print("Garantizo que me ejecuto SIEMPRE")
+        print(personajes[len(personajes)-1]) # imprimo el último personaje de la lista
+
+
+    ##### LANZAR EXCEPCIONES
+    sauron: Enano = Enano()
+    if type(sauron) == Enano:
+        pass
+        #raise TypeError("Sauron no es un enano")
+
+    try:
+        print(gandalf.get_arma()/2)  # TypeError
+    except TypeError as error_tipo:
+        print("Puedo hacer algo y seguir lanzando el error")
+        #raise error_tipo
+
+    #### EXCEPCIONES ENTRE FUNCIONES
+    try:
+        orco.ataca(energia=10.5, fuerza=4.3)
+    except AssertionError as error:
+        print(error)
+        print("Orco no ha podido atacar finalmente. Continuamos jugando...")
+
+
+    #### EXCEPCIONES PROPIAS ###
+    try:
+        frodo.fabrica_arma(nombre="Palo", tipo=None)
+    except ArmaError as error:
+        print(error)
+        # Por tanto, frodo sigue teniendo la Magnum
+
+    while True:
+        try:
+            frodo.usa_arma(orco)
+        except ArmaError as arma_error:
+            print(f"MAIN: Hay un problema con el arma! {arma_error}")
+            break

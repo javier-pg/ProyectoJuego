@@ -1,6 +1,9 @@
 from enum import Enum
 from abc import ABC, abstractmethod
 
+from elementos.errores.errores import ArmaError, ArmaVaciaError
+
+
 class TipoArma(Enum):
     """
     Enumerado para los tipos de armas
@@ -177,8 +180,6 @@ class ArmaCorta(Arma):
         Devuelve una representación en forma de cadena del arma
         """
         return super().__str__() + f" - Estocadas: {self._estocadas}"
-
-
         
 class ArmaFuego(Arma):
     """
@@ -214,8 +215,8 @@ class ArmaFuego(Arma):
             self._balas -= 1
             return True
         else:
-            print("No hay balas")
-            return False
+            raise ArmaVaciaError(dueño=self.get_dueño(), arma=self)
+            return False # esto vuelve?
 
     def mejorar(self):
         """
